@@ -108,6 +108,44 @@ else:
 # PERSON
 # ORGANIZATION
 # LOCATION
+import numpy as np
+from scipy.cluster.vq import kmeans2
+entities = []
+for doc in mis_docs:
+    tagged_text = doc.tagged_text
+    for tag_word in tagged_text:
+        if tag_word[1] == 'PERSON' or tag_word[1] == 'LOCATION' or tag_word[1] == 'ORGANIZATION':
+            entities.append(tag_word)
+dimensions = []
+for entity in entities:
+    print(str(entity))
+    dimensions.append(entity[0])
+print(str(dimensions))
+dataset = np.zeros(shape=(len(mis_docs), len(dimensions)))
+doc_nro = 0
+dim_nro = 0
+for doc in mis_docs:
+    dim_nro = 0
+    for dimension in dimensions:
+        dataset[doc_nro][dim_nro] = doc.tagged_text.count(dimension)
+        print(str(dataset[doc_nro][dim_nro]))
+        dim_nro +=1
+    doc_nro+=1
+
+
+nro_of_clusters = 30
+centroids, labels = kmeans2(dataset, nro_of_clusters)
+labeled = []
+doc_nro=0
+for doc in mis_docs:
+    labeled.append((doc,labels[doc_nro]))
+    doc_nro+=1
+print(str(dataset))
+for elm in labeled:
+    print(str(elm[0].title)+','+str(elm[1]))
+
+print(len(entities))
+
 
 
 
@@ -132,13 +170,9 @@ for doc in mis_docs:
         cant_worldNews += 1
     if(doc.section == 'Politics'):
         cant_politics += 1
-    if cant_noticias < 10:
-        print(str(doc.tokenized_text))
     todas_las_palabras = todas_las_palabras.union(set(doc.tokenized_text))
     prom_palabras += len(doc.tokenized_text)
 prom_palabras = prom_palabras / cant_noticias
-
-
 
 
 print('Cantidad de noticias: '+str(cant_noticias))
