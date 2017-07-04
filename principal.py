@@ -38,6 +38,8 @@ INPUT = 'db/news/noticias2013'
 # webPublicationDate: 2013-01-31T23:45:38Z
 # bodytext:
 
+re_do = False
+
 import pickle
 tokenized_docs_file = 'db/documents/tokenized_docs.p'
 # ==================================================================================================================
@@ -78,8 +80,39 @@ if not os.path.isfile(tokenized_docs_file):
     print("finished")
 else:
     mis_docs = pickle.load(open(tokenized_docs_file, 'rb'))
+
+
 # ==================================================================================================================
-# ===================================== LEVANTAR, TOKENIZAR Y VOLVER A GUARDAR =====================================
+# ===================================== Seleccionar solo noticias de argentina =====================================
+# ==================================================================================================================
+
+if re_do:
+    pais = ['argentina','argentinian']
+
+    docs_sobre_pais = [doc for doc in mis_docs if pais[0] in doc.tokenized_text or pais[1] in doc.tokenized_text]
+
+    mis_docs = docs_sobre_pais
+
+
+    from nltk.tag import StanfordNERTagger
+    st = StanfordNERTagger('english.all.3class.distsim.crf.ser.gz', '/opt/stanford-ner-2017-06-09/stanford-ner.jar')
+    for doc in mis_docs:
+        doc.tagged_text =st.tag(doc.tokenized_text)
+    pickle.dump(mis_docs, open(tokenized_docs_file,'wb'))
+
+    print("Filtradas noticias distintas a pais")
+else:
+    mis_docs = pickle.load(open(tokenized_docs_file, 'rb'))
+
+
+# PERSON
+# ORGANIZATION
+# LOCATION
+
+
+
+# ==================================================================================================================
+# ================================ REALIZAR ESTADISTICA GENERAL SOBRE LAS NOTICIAS =================================
 # ==================================================================================================================
 todas_las_palabras = set()
 prom_palabras = 0
@@ -99,9 +132,14 @@ for doc in mis_docs:
         cant_worldNews += 1
     if(doc.section == 'Politics'):
         cant_politics += 1
-    #todas_las_palabras = todas_las_palabras.union(set(doc.tokenized_text))
+    if cant_noticias < 10:
+        print(str(doc.tokenized_text))
+    todas_las_palabras = todas_las_palabras.union(set(doc.tokenized_text))
     prom_palabras += len(doc.tokenized_text)
 prom_palabras = prom_palabras / cant_noticias
+
+
+
 
 print('Cantidad de noticias: '+str(cant_noticias))
 print('promedio de palabras por noticia: '+str(prom_palabras))
@@ -109,6 +147,5 @@ print('Cantidad de noticias de society: ' + str(cant_society))
 print('Cantidad de noticias de world news: '+ str(cant_worldNews))
 print('Cantidad de noticias de politics: ' + str(cant_politics))
 print('Cantidad de noticias de business: '+str(cant_business))
-print('Cantidad de palabras distintas: 219910 ')
+print('Cantidad de palabras distintas:  '+str(len(todas_las_palabras)))
 
-print('hello world')
