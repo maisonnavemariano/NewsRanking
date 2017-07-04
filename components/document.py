@@ -13,12 +13,12 @@ class Document(object):
         self.text = text
 
 class TokenizedDocument(object):
-    def __init__(self, Document):
-        self.title = Document.title
-        self.section = Document.section
-        self.date = Document.date
-        self.text = Document.text
-        self.tokenized_text = _prefilter(word_tokenize(BeautifulSoup(self.text).get_text())) + _prefilter(word_tokenize(self.title))
+    def __init__(self, myDoc):
+        self.title = myDoc.title
+        self.section = myDoc.section
+        self.date = myDoc.date
+        self.text = myDoc.text
+        self.tokenized_text = _prefilter(word_tokenize(BeautifulSoup(self.text.lower(), "lxml").get_text())) + _prefilter(word_tokenize(self.title.lower()))
 
 def _prefilter(text):
     t = [palabra for palabra in text if palabra not in stopwords_list]
