@@ -83,10 +83,10 @@ else:
 
 
 # ==================================================================================================================
-# ===================================== Seleccionar solo noticias de argentina =====================================
+# =========================== Seleccionar solo noticias de argentina y aplicar Tagger ==============================
 # ==================================================================================================================
 
-if re_do:
+if True:
     pais = ['argentina','argentinian']
 
     docs_sobre_pais = [doc for doc in mis_docs if pais[0] in doc.tokenized_text or pais[1] in doc.tokenized_text]
@@ -97,56 +97,81 @@ if re_do:
     from nltk.tag import StanfordNERTagger
     st = StanfordNERTagger('english.all.3class.distsim.crf.ser.gz', '/opt/stanford-ner-2017-06-09/stanford-ner.jar')
     for doc in mis_docs:
-        doc.tagged_text =st.tag(doc.tokenized_text)
+        doc.tagged_text  =st.tag(doc.tokenized_text)
     pickle.dump(mis_docs, open(tokenized_docs_file,'wb'))
 
     print("Filtradas noticias distintas a pais")
 else:
     mis_docs = pickle.load(open(tokenized_docs_file, 'rb'))
 
+dimensions = []
+dimensions_set = set()
+i = 0
+for doc in mis_docs:
+    if i ==0:
+        print(doc.title)
+        print(doc.section)
+        print(doc.date)
+        print(str(doc.tokenized_text))
+        print(str(doc.tagged_text))
+    i+=1
+    tagged_words = doc.tagged_text
+    for tag_word in tagged_words:
+        (word,tag) = tag_word
+        if not tag in dimensions_set:
+            dimensions_set.add(tag)
+            dimensions.append(tag)
 
+
+# ==================================================================================================================
+# ================================================== CLUSTERING ====================================================
+# ==================================================================================================================
 # PERSON
 # ORGANIZATION
 # LOCATION
-import numpy as np
-from scipy.cluster.vq import kmeans2
-entities = []
-for doc in mis_docs:
-    tagged_text = doc.tagged_text
-    for tag_word in tagged_text:
-        if tag_word[1] == 'PERSON' or tag_word[1] == 'LOCATION' or tag_word[1] == 'ORGANIZATION':
-            entities.append(tag_word)
-dimensions = []
-for entity in entities:
-    print(str(entity))
-    dimensions.append(entity[0])
-print(str(dimensions))
-dataset = np.zeros(shape=(len(mis_docs), len(dimensions)))
-doc_nro = 0
-dim_nro = 0
-for doc in mis_docs:
-    dim_nro = 0
-    for dimension in dimensions:
-
-        dataset[doc_nro][dim_nro] = doc.tokenized_text.count(dimension)
-        print(str(dataset[doc_nro][dim_nro]))
-        dim_nro +=1
-    doc_nro+=1
-
-
-nro_of_clusters = 30
-centroids, labels = kmeans2(dataset, nro_of_clusters)
-labeled = []
-doc_nro=0
-for doc in mis_docs:
-    labeled.append((doc,labels[doc_nro]))
-    doc_nro+=1
-print(str(dataset))
-for elm in labeled:
-    print(str(elm[0].title)+','+str(elm[1]))
-
-print(len(entities))
-
+# import numpy as np
+# from scipy.cluster.vq import kmeans2
+# cluster_result = 'db/clusters/clusters.p'
+# if True:
+#     entities = []
+#     for doc in mis_docs:
+#         tagged_text = doc.tagged_text
+#         for tag_word in tagged_text:
+#             if tag_word[1] == 'PERSON' or tag_word[1] == 'LOCATION' or tag_word[1] == 'ORGANIZATION':
+#                 entities.append(tag_word)
+#     dimensions = []
+#     for entity in entities:
+#         dimensions.append(entity[0])
+#     dataset = np.zeros(shape=(len(mis_docs), len(dimensions)))
+#     doc_nro = 0
+#     dim_nro = 0
+#     for doc in mis_docs:
+#         dim_nro = 0
+#         for dimension in dimensions:
+#             dataset[doc_nro][dim_nro] = doc.tokenized_text.count(dimension)
+#             dim_nro +=1
+#         doc_nro+=1
+#
+#
+#     nro_of_clusters = 10
+#     centroids, labels = kmeans2(dataset, nro_of_clusters)
+#     labeled = []
+#     doc_nro=0
+#     for doc in mis_docs:
+#         labeled.append((doc,labels[doc_nro]))
+#         doc_nro+=1
+#     print(str(dataset))
+#     pickle.dump(labeled, open(cluster_result, 'wb'))
+# else:
+#     labeled = pickle.load(open(cluster_result, 'rb'))
+#
+# from collections import defaultdict
+# freq = defaultdict(int)
+#
+# for elem in labeled:
+#     freq[elem[1]] +=1
+# for i in range(0,11):
+#     print(str(i)+": "+str(freq[i]))
 
 
 
