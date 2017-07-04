@@ -127,7 +127,8 @@ dim_nro = 0
 for doc in mis_docs:
     dim_nro = 0
     for dimension in dimensions:
-        dataset[doc_nro][dim_nro] = doc.tagged_text.count(dimension)
+
+        dataset[doc_nro][dim_nro] = doc.tokenized_text.count(dimension)
         print(str(dataset[doc_nro][dim_nro]))
         dim_nro +=1
     doc_nro+=1
