@@ -38,14 +38,14 @@ INPUT = 'db/news/noticias2013'
 # webPublicationDate: 2013-01-31T23:45:38Z
 # bodytext:
 
-re_do = False
+re_do = True
 
 import pickle
 tokenized_docs_file = 'db/documents/tokenized_docs.p'
 # ==================================================================================================================
 # ===================================== LEVANTAR, TOKENIZAR Y VOLVER A GUARDAR =====================================
 # ==================================================================================================================
-if not os.path.isfile(tokenized_docs_file):
+if re_do:
     _INSTANCE_NRO = 'instanceNro: '
     _TITLE = 'webTitle: '
     _SECTION = 'sectionName: '
@@ -72,7 +72,6 @@ if not os.path.isfile(tokenized_docs_file):
                 doc = Document(title,section,date,text)
                 i += 1
                 if isValidDoc(doc):
-                    print(str(i))
                     mis_docs.append(TokenizedDocument(doc))
 
     pickle.dump(mis_docs, open(tokenized_docs_file,'wb'))
@@ -85,12 +84,17 @@ else:
 # ==================================================================================================================
 # =========================== Seleccionar solo noticias de argentina y aplicar Tagger ==============================
 # ==================================================================================================================
+def countryInList(tokenized_text, paises = ['argentina','argentinian']):
+    for word in tokenized_text:
+        for pais in paises:
+            if pais.lower() == word.lower():
+                return True
+    return False
 
 if True:
-    pais = ['argentina','argentinian']
-
-    docs_sobre_pais = [doc for doc in mis_docs if pais[0] in doc.tokenized_text or pais[1] in doc.tokenized_text]
-
+    print("len mis docs: "+str(len(mis_docs)))
+    docs_sobre_pais = [doc for doc in mis_docs if countryInList(doc.tokenized_text )]
+    print("len doc de pais: "+str(len(docs_sobre_pais)))
     mis_docs = docs_sobre_pais
 
 
