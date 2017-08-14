@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 import string
