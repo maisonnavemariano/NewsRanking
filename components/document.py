@@ -21,13 +21,16 @@ class TokenizedDocument(object):
         self.section = myDoc.section
         self.date = myDoc.date
         self.text = myDoc.text
-        self.tokenized_text = _prefilter(word_tokenize(BeautifulSoup(self.text.lower(), "lxml").get_text())) + _prefilter(word_tokenize(self.title.lower()))
+        self.tokenized_text = _prefilter(word_tokenize(BeautifulSoup(self.text, "lxml").get_text())) + _prefilter(word_tokenize(self.title))
         self.tagged_text = []
 
 def _prefilter(text):
-    t = [palabra for palabra in text if palabra not in stopwords_list]
+    t = [palabra for palabra in text if palabra.lower() not in stopwords_list]
     t = [palabra for palabra in t if not palabra in string.punctuation]
     return t
 
 def isValidDoc(doc):
     return doc.section in _ALLOWED_SECTIONS and len(doc.text)>0
+
+def _getEntities(doc):
+    tagged_text = doc.tagged_text
